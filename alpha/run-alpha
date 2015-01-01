@@ -1,0 +1,4 @@
+#!/bin/sh
+# `/sbin/setuser postgres` runs the given command as the user `postgres`.
+# If you omit that part, the command will be run as root.
+/alpha
