@@ -1,7 +1,8 @@
 #!/bin/sh -x 
+echo starting to run the receive script
 dir=`mktemp -d /tmp/gitrecvXXXXXX`
 cat | tar -x -C "$dir"
-source /etc/environment
+#source /etc/environment
 echo "workdir is $dir"
 cd "$dir/alpha"
 make alpha
