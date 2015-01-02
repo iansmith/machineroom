@@ -50,8 +50,12 @@ $machineroom = <<MRSCRIPT
 sudo gpasswd -a vagrant docker
 sudo route -n add 10.0.0.0/16 192.168.33.10
 
-docker build -t pg93:0.0.1 PWD/gotooling
-docker build -t gotooling:0.0.1 PWD/database
+docker build -t pg93:0.0.1 PWD/database
+docker build -t gotooling:0.0.1 PWD/gotooling
+cd PWD/beta
+make beta static/client.js
+cd PWD/alpha
+make alpha
 
 cd PWD
 fig pull && fig build

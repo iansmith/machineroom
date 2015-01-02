@@ -58,7 +58,7 @@ beta:
   links:
   - consul
   volumes:
-  - beta/static/:/static
+  - ./beta/static/:/static
   environment:
     SERVICE_80_NAME: http
     SERVICE_NAME: beta

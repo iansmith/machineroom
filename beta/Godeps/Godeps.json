@@ -1,0 +1,22 @@
+{
+	"ImportPath": "github.com/igneous-systems/beta",
+	"GoVersion": "go1.4",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/gopherjs/gopherjs/js",
+			"Rev": "acdc699252e0e09430ab30d438bd9fa0983bf327"
+		},
+		{
+			"ImportPath": "github.com/gopherjs/jquery",
+			"Rev": "d0acc794a0fd3937613bd659238541b6e3a85315"
+		},
+		{
+			"ImportPath": "github.com/seven5/seven5/client",
+			"Comment": "bauhaus_pre1-118-ga3834bc",
+			"Rev": "a3834bcf1e8629dee5b6faa3a3b13c470981b9a2"
+		}
+	]
+}

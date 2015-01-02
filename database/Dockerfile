@@ -14,7 +14,7 @@ RUN chmod +x /tmp/provision.sh
 ADD provision.sql /tmp/provision.sql
 RUN chmod +x /tmp/provision.sh
 
-RUN echo 'host all  all    0.0.0.0/0  trust' >> /etc/postgresql/9.3/main/pg_hba.conf
+RUN echo 'host alpha  postgres    0.0.0.0/0  password' >> /etc/postgresql/9.3/main/pg_hba.conf
 RUN echo "listen_addresses='*'" >> /etc/postgresql/9.3/main/postgresql.conf
 
 RUN /tmp/provision.sh

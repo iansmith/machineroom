@@ -11,10 +11,11 @@ vagrant up
 This will pull a 700MB vagrant box called 
 [machineroom-base](https://atlas.hashicorp.com/iansmith/boxes/machineroom-base) 
 from  [atlas](http://atlas.hashicorp.com/).  Further, there are various
-images that need to "pulled" into the docker cache and that takes a while
-too.  
+images that need to pulled or built into the docker cache and that 
+takes a while too.  
 
-Read on while your downloads roll.
+Read on while your downloads roll, although watch for the need to issue your
+admin password to allow the vagrant box to NFS mount your home directory.
 
 MACHINEROOM
 ============
@@ -61,6 +62,102 @@ We would like to illustrate, but haven't yet:
 
 DEMO
 ====
+
+Once you have the vagrant box up, you will want to log into with a few shells,
+via `vagrant ssh`.  All the commands in this document are expected to be
+running on the "inside" of the machineroom VM unless specifically noted.  This
+VM does the standard trick of mounting your home directory in the usual place.
+You should do `cd /Users/yournamehere/machineroom` or whatever the path is to
+this source code.  We'll assume that you are in that directory (the one with
+the `fig.yml`) unless otherwise noted.
+
+Note: You probably could get a lot of these things to work "remotely" by 
+setting `DOCKER_HOST` and running `fig` or other tools on your OSX box. 
+However, the current version of docker has TLS turned on for TCP sockets 
+and I didn't feel like configuring that crap for this demo.
+
+Note: This vagrant setup suffers from the same problem of DHCP badness recently reported by JMedef.  You can fix it right, or just restart the
+VM.
+
+Basics
+------
+Run `fig up` to bring up the server configuration and watch the log messages.
+
+You should see a lot of 
+output, color coded by which service it is coming from.  These are:
+
+* `alpha` application under test (written by me)
+* `beta` development only tool (written by me)
+* [`consul`](http://consul.io) the service bus
+* `lb` is a load balancer, implemented with nginx reverse-proxy, that is service-bus aware.
+* `database` the postgres instance used by the applications and visible
+on the service bus
+* [`registrator`](https://github.com/progrium/registrator) is a 
+monitoring app that watches for docker containers that come and go,
+and updates the service bus appropriately.  
+
+You can control-c the "fig up" and do `fig kill` to bring everything down.
+You may find it interesting to look at `docker ps` and compare that to
+`fig ps` when the full configuration is up.  More info on fig is below.
+
+
+Scaling
+------
+You will notice in the output that there is a `_1` suffix on each 
+application's output.  This is because fig understands scaling a particular
+service.  You can try this by `fig scale alpha=8` in another shell. You
+will see the various application instances being manipulated and the load
+balancer being updated.  Note that `fig scale alpha=0` seems to cause the
+fig "configuration" to exit.
+
+Check routing
+-------------
+You _should_ be able to go to the url `http://alpha.service.consul:8080` 
+in your web browser and get some output from it.  If you are not, 
+then probably the combo of DNS and routing is bodged up.  
+See below sections on OSX setup to do some digging into how to get it to 
+work right.
+
+If you want to build the Beta application yourself
+---------------------------------------------------
+Make sure that your fig configuration is down with control-c and `fig kill`.
+
+On the vagrant VM, build the code for the server and client like this:
+```
+cd beta
+make beta static/client.js
+cd ..
+fig build
+```
+
+The latter two commands rebuild the server-side image that has the beta binary
+in it.  The client.js file is served "live" from the `beta/static` directory.
+
+The source code for the beta server is in `beta/main.go` and the client side
+code is in `beta/client/clientmain.go`. Note that `make static/client.js` can be run without bringing down the fig configuration.
+
+
+Configuration of the Database Params With Beta
+-----------------------------------------------
+
+WARNING: This URL/routing config is busted.  It should be the case that 
+we could go to `http://beta.service.consul/index.html` and 
+have that work correctly,  but I don't know enough DNS/routing to get 
+that to work properly 
+(see TODO below).  For now the workaround is to use 
+`http://alpha.service.consul/beta/index.html` to get to the instance of 
+beta.  This is a horrible hack through the nginx reverse proxy.
+
+Beta is a simple AJAX app for setting the configuration parameters that 
+be used for the database. In a production environment, these parameters will
+be "baked in" but it is instructive to see how it works for development.
+
+Note that this is using the 
+[http api](http://www.consul.io/docs/agent/http.html) to interact with the
+key/value store in consul.  That layer of consul is strongly consistent for
+reads so when you change this, other folks using the key value will get
+your update as soon as completes.  They can also solicit to be notified 
+of changes like this. 
 
 
 OS X SETUP OF ROUTES TO CONTAINERS

@@ -1,3 +1,7 @@
 .vagrant
 alpha/alpha
 beta/beta
+beta/static/client.js
+beta/static/client.jsmap
+external
+beta/enable-machineroom
