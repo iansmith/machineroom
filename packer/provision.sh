@@ -61,7 +61,7 @@ sudo apt-get install -y -q lxc-docker
 echo 'DOCKER_OPTS="--dns 10.0.2.15 --dns 8.8.8.8 --dns 8.8.4.4"' | sudo tee -a /etc/default/docker
 sudo service docker restart
 sudo usermod -a -G docker git
-sudo usermod -a -G docker root
+sudo usermod -a -G docker ubuntu
 sudo usermod -a -G docker vagrant
 
 ##

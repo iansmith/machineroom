@@ -208,9 +208,15 @@ packer build --only=amazon-ebs -var 'password=encryptedpwd' machineroom.json
 This builds only the amazon ebs image and sets the user 'igneous' to have
 the password you supply on the command line.
 
-At the moment, you can't build the vagrant image with the same process. 
+>>>At the moment, you can't build the vagrant image with the same process. 
 Something is different between `vagrant package` and `packer` vagrant
 post-processor.  Sad.
+
+Once you have done that, you'll see an amazon AWS ami pop out on the terminal.
+Go to the amazon console for `us-west-2` and launch it; the defaults are set
+for `t2.micro` but other sizes will probably work.  Set the private key to one
+you have access to so you can ssh in as "ubuntu" to be able to sudo on that
+host.  Once the host is up, make a note of the hostname.
 
 
 OS X SETUP OF ROUTES TO CONTAINERS
