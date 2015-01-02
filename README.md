@@ -114,14 +114,14 @@ have destroy everything.
 
 Check routing
 -------------
-You _should_ be able to go to the url `http://alpha.service.consul:8080` 
+You _should_ be able to go to the url `http://alpha.service.consul` 
 in your web browser and get some output from it.  If you are not, 
 then probably the combo of DNS and routing is bodged up.  
 See below sections on OSX setup to do some digging into how to get it to 
 work right.
 
 If you want to build the Beta or Alpha application yourself
----------------------------------------------------
+-----------------------------------------------------------
 Make sure that your fig configuration is down with control-c and `fig kill`.
 
 On the vagrant VM, build the code for the server and client like this:
@@ -148,10 +148,10 @@ Configuration of the Database Params With Beta
 
 WARNING: This URL/routing config is busted.  It should be the case that 
 we could go to `http://beta.service.consul/index.html` and 
-have that work correctly,  but I don't know enough DNS/routing to get 
-that to work properly 
-(see TODO below).  For now the workaround is to use 
-`http://alpha.service.consul/beta/index.html` to get to the instance of 
+have that work correctly,  but the `registrator` can't seem to handle 
+sending the _private_ names/ip addrs to the consul service bus so
+everything gets bound to a single IP addr.  For now the workaround is to 
+use  `http://alpha.service.consul/beta/index.html` to get to the instance of 
 beta.  This is a horrible hack through the nginx reverse proxy.
 
 "beta" is a simple AJAX app for setting the configuration parameters that 
@@ -185,10 +185,32 @@ configuration parameters (set above in beta) and the network location
 of the database it wants (via consul's DNS mechanism).  The host of 
 interest to this app is `alpha.postgres.service.consul`
 
-Since there is a load-balancer "in the way", you can just hit 
+Since there is a load-balancer "in the way", you can just reload 
 `http://alpha.service.consul` repeatedly and watch the different hosts
 get rotated through.
 
+
+BUILDING IMAGES YOURSELF
+========================
+You have to have [packer](http://packer.io) installed to do the things in
+this section.  Also you must have set the `AWS_ACCESS_KEY` and 
+`AWS_SECRET_KEY` environment variables to the usual values.
+
+You'll want to pick a password and then encrypt it with 
+`openssl passwd -crypt fart` and use the encrypted version below. 
+
+If you want to build an AMI for yourself, you can do that
+by going into the packer directory and doing:
+```
+packer build --only=amazon-ebs -var 'password=encryptedpwd' machineroom.json
+```
+
+This builds only the amazon ebs image and sets the user 'igneous' to have
+the password you supply on the command line.
+
+At the moment, you can't build the vagrant image with the same process. 
+Something is different between `vagrant package` and `packer` vagrant
+post-processor.  Sad.
 
 
 OS X SETUP OF ROUTES TO CONTAINERS

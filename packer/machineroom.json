@@ -1,0 +1,41 @@
+
+{
+  "variables": {
+    "password": null
+  },
+
+  "builders": [{
+    "type": "amazon-ebs",
+    "region": "us-west-2",
+    "source_ami": "ami-0b47053b",
+    "instance_type": "t2.micro",
+    "ssh_username": "ubuntu",
+    "ami_name": "machineroom-{{timestamp}}"
+  }
+  ],
+
+  "provisioners": [
+   {
+      "type":"file",
+      "source":"provision.sh",
+      "destination": "/tmp/provision.sh"
+    },
+   {
+      "type":"file",
+      "source":"../consul/bootstrap.conf",
+      "destination": "/tmp/bootstrap.conf"
+    },
+   {
+      "type":"file",
+      "source":"../consul/consul.conf",
+      "destination": "/tmp/consul.conf"
+    },
+    {
+		"type":"shell",
+  		"inline": [
+          "sudo chmod +x /tmp/provision.sh",
+          "/tmp/provision.sh"
+        ]
+	   }     
+  ]
+}

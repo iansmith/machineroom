@@ -48,13 +48,22 @@
 
 $machineroom = <<MRSCRIPT
 sudo gpasswd -a vagrant docker
-sudo route -n add 10.0.0.0/16 192.168.33.10
 
-sudo useradd consul -p consul -m -s /bin/bash 
-sudo mkdir -p /etc/consul.d/bootstrap
-sudo mkdir /var/consul
-sudo chown consul:consul /var/consul
+sudo mkdir -p /etc/consul.d/
+sudo mkdir -p /var/consul
+sudo cp /tmp/bootstrap.conf /etc/consul.d/bootstrap.conf
+sudo cp /tmp/consul.conf /etc/init/consul.conf
+sudo service consul start
 
+echo 'DOCKER_OPTS="--dns 10.0.2.15 --dns 8.8.8.8 --dns 8.8.4.4"' | sudo tee -a /etc/default/docker
+sudo service docker restart
+
+cd /tmp
+wget https://raw.github.com/progrium/gitreceive/master/gitreceive
+sudo mv gitreceive /usr/local/bin/gitreceive
+sudo chmod +x /usr/local/bin/gitreceive
+sudo /usr/local/bin/gitreceive init
+sudo gpasswd -a git docker
 
 docker build -t pg93:0.0.1 PWD/database
 docker build -t gotooling:0.0.1 PWD/gotooling
@@ -73,5 +82,10 @@ Vagrant.configure("2") do |config|
     config.vm.network "private_network", ip: "192.168.33.10"
     config.vm.network "forwarded_port", guest: 2375, host: 2375
     config.vm.synced_folder "~", ENV['HOME'], type: "nfs"
+
+    config.vm.provision "file", source: "consul/bootstrap.conf", destination: "/tmp/bootstrap.conf"
+    config.vm.provision "file", source: "consul/consul.conf", destination: "/tmp/consul.conf"
+
+
     config.vm.provision "shell", inline: $machineroom.gsub("PWD",ENV['PWD'])
 end
