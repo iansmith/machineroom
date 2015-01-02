@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/sh 
 
-PROG="beta"
+PROG="alpha"
 
 ## this horrible hack is necessary because of the fact that we are doing
 ## tricks with the gopath that confuse godeps.  it wants there to be a
@@ -19,15 +19,16 @@ git config --global user.name "Godep NeedsWork"
 git config --global user.email "brokenhack@example.com"
 git commit --allow-empty -m "no message"
 
-cd /go/src/github.com/igneous-systems/$PROG/
-godep save ./...
 
-OK="y"
+cd /go/src/github.com/igneous-systems/$PROG/
+godep save .
+
+GODEPOK="y"
 if [ "$?" != "0" ]; then
 		echo "******* "
 		echo "******* godep failed!"
 		echo "******* "
-		OK="n"
+		GODEPOK="n"
 fi
 
 #scary
@@ -36,7 +37,7 @@ cd /go/src/github.com/igneous-systems/lib/
 rm -rf .git
 
 ##show us what happened
-if [ "$OK" == "n" ]; then
+if [ "$GODEPOK" == "n" ]; then
 	exit 1
 fi
 

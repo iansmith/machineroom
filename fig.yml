@@ -40,10 +40,12 @@ database:
   environment:
     SERVICE_5432_NAME: postgres
     SERVICE_NAME: database
-    SERVICE_TAGS: host_count
+    SERVICE_TAGS: alpha
 
 alpha:
   build: ./alpha
+  links:
+  - consul
   ports:
   - "8888:80"
   environment:

@@ -87,7 +87,7 @@ You should see a lot of
 output, color coded by which service it is coming from.  These are:
 
 * `alpha` application under test (written by me)
-* `beta` development only tool (written by me)
+* `beta` development/demonstration only tool (written by me)
 * [`consul`](http://consul.io) the service bus
 * `lb` is a load balancer, implemented with nginx reverse-proxy, that is service-bus aware.
 * `database` the postgres instance used by the applications and visible
@@ -118,7 +118,7 @@ then probably the combo of DNS and routing is bodged up.
 See below sections on OSX setup to do some digging into how to get it to 
 work right.
 
-If you want to build the Beta application yourself
+If you want to build the Beta or Alpha application yourself
 ---------------------------------------------------
 Make sure that your fig configuration is down with control-c and `fig kill`.
 
@@ -136,6 +136,10 @@ in it.  The client.js file is served "live" from the `beta/static` directory.
 The source code for the beta server is in `beta/main.go` and the client side
 code is in `beta/client/clientmain.go`. Note that `make static/client.js` can be run without bringing down the fig configuration.
 
+The same process applies to building the `alpha/main.go` server-side; it has 
+no client side code.  As with beta, you have to `fig build` after changing the
+alpha server code.
+
 
 Configuration of the Database Params With Beta
 -----------------------------------------------
@@ -148,16 +152,40 @@ that to work properly
 `http://alpha.service.consul/beta/index.html` to get to the instance of 
 beta.  This is a horrible hack through the nginx reverse proxy.
 
-Beta is a simple AJAX app for setting the configuration parameters that 
+"beta" is a simple AJAX app for setting the configuration parameters that 
 be used for the database. In a production environment, these parameters will
-be "baked in" but it is instructive to see how it works for development.
+be "baked in" but it is instructive to see how it works for development. This
+would be the type of tool that our ops folks would use to poke at the 
+configuration on production and have it "picked up" in the product code.
 
 Note that this is using the 
 [http api](http://www.consul.io/docs/agent/http.html) to interact with the
 key/value store in consul.  That layer of consul is strongly consistent for
 reads so when you change this, other folks using the key value will get
-your update as soon as completes.  They can also solicit to be notified 
-of changes like this. 
+your update as soon as completes.  Clients of this api can also solicit 
+to be notified  of changes in the KV store, although that's not in use here. 
+
+You can type a username and password into the form provided to change the
+settings that will be used by the "alpha" application.  Errors are reported
+in the page.  _Set the username and password to *postgres* and *seekret*_. 
+At least set it to that if you want the alpha application to work; you may
+find it interesting to set this to "wrong" values as well and watch what
+happens to alpha.  The username and password is burned into the 
+database image in use with this demo and is not easily changed (see
+`database/provision.sh` and `database/provision.sql`).
+
+Seeking Alpha
+-------------
+Alpha is a very simple database application that records the number of times
+tha each host in the load balancer receives a request.  It starts up
+with only knowlege of the service bus and then discovers the database
+configuration parameters (set above in beta) and the network location
+of the database it wants (via consul's DNS mechanism).  
+
+Since there is a load-balancer "in the way", you can just hit 
+`http://alpha.service.consul` repeatedly and watch the different hosts
+get rotated through.
+
 
 
 OS X SETUP OF ROUTES TO CONTAINERS
