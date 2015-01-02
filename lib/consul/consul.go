@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	KV_API_ENDPOINT = "http://consul:8500/v1/kv"
+	KV_API_ENDPOINT = "http://machineroom.node.consul:8500/v1/kv"
 )
 
 type Key struct {

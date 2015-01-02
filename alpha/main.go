@@ -20,8 +20,8 @@ const (
 )
 
 type HostCount struct {
-	Host  string `qbs:"pk"`
-	Count int
+	Hostname string `qbs:"pk"`
+	Count    int
 }
 
 func tryPostgres(user string, pwd string) (*sql.DB, error) {
@@ -82,18 +82,25 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var count HostCount
-	count.Host = h
-
+	count.Hostname = h
+	q.Log = true
 	if err := q.Find(&count); err != nil {
 		if err != sql.ErrNoRows {
 			fmt.Fprintf(w, "find failed (probably your crendentials are bad): %v", err)
 			return
 		}
 	}
+	//why doesn't this happen?
 	if err == sql.ErrNoRows {
 		fmt.Fprintf(w, "no count found for %s", h)
 	}
+	count.Count++
+	fmt.Fprintf(w, "new count for %s is %d", count.Hostname, count.Count)
 
+	if _, err := q.Save(&count); err != nil {
+		fmt.Fprintf(w, "save failed: %v", err)
+		return
+	}
 }
 
 func main() {

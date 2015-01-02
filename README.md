@@ -108,7 +108,9 @@ application's output.  This is because fig understands scaling a particular
 service.  You can try this by `fig scale alpha=8` in another shell. You
 will see the various application instances being manipulated and the load
 balancer being updated.  Note that `fig scale alpha=0` seems to cause the
-fig "configuration" to exit.
+fig "configuration" to exit.  Also, use of `fig scale` with other containers
+will likely cause terrible things to happen; `fig rm` is your friend if you
+have destroy everything.
 
 Check routing
 -------------
@@ -251,6 +253,8 @@ dns) cache _is_ important if you have previously goofed up the config for your
 should say ``;;SERVER: 192.168.33.10#8600(192.168.33.10)``.  
 Clearing your udns cache is thus still advised.
 
+This command can be helpful to see what your mac thinks of the resolvers
+in use: `sudo discoveryutil configresolvers`
 
 FIG
 ===

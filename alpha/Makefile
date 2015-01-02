@@ -1,4 +1,4 @@
-alpha: main.go
+alpha: main.go ../lib/consul/consul.go
 	docker run \
 	-v $(PWD):/go/src/github.com/igneous-systems/alpha \
 	-v $(PWD)/../lib:/go/src/github.com/igneous-systems/lib \

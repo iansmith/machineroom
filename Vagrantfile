@@ -50,6 +50,12 @@ $machineroom = <<MRSCRIPT
 sudo gpasswd -a vagrant docker
 sudo route -n add 10.0.0.0/16 192.168.33.10
 
+sudo useradd consul -p consul -m -s /bin/bash 
+sudo mkdir -p /etc/consul.d/bootstrap
+sudo mkdir /var/consul
+sudo chown consul:consul /var/consul
+
+
 docker build -t pg93:0.0.1 PWD/database
 docker build -t gotooling:0.0.1 PWD/gotooling
 cd PWD/beta

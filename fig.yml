@@ -1,33 +1,11 @@
-# app:
-#   image: tutum/hello-world:latest
-#   environment:
-#     SERVICE_80_NAME: http
-#     SERVICE_NAME: app
-#     SERVICE_TAGS: production
-#   ports:
-#   - "80"
-
 lb:
   build: ./lb
-  links:
-  - consul
   ports:
   - "80:80"
 
-consul:
-  command: -server -bootstrap -advertise 10.0.2.15
-  image: progrium/consul:latest
-  ports:
-  - "8300:8300"
-  - "8400:8400"
-  - "8500:8500"
-  - "172.17.42.1:8600:53/udp"
-
 registrator:
-  command: consul://consul:8500
+  command: consul://machineroom.node.consul:8500
   image: progrium/registrator:latest
-  links:
-  - consul
   volumes:
   - "/var/run/docker.sock:/tmp/docker.sock"
 
@@ -35,8 +13,6 @@ database:
   image: pg93:0.0.1
   ports:
   - "5432:5432"
-  links:
-  - consul
   environment:
     SERVICE_5432_NAME: postgres
     SERVICE_NAME: database
@@ -44,24 +20,17 @@ database:
 
 alpha:
   build: ./alpha
-  links:
-  - consul
   ports:
-  - "8888:80"
-  dns:
-  - consul
-  - 8.8.8.8
+  - "80"
   environment:
-    SERVICE_80_NAME: http
+    # SERVICE_80_NAME: http
     SERVICE_NAME: alpha
     SERVICE_TAGS: development
 
 beta:
   build: ./beta
   ports:
-  - "8080:80"
-  links:
-  - consul
+  - "80"
   volumes:
   - ./beta/static/:/static
   environment:
@@ -69,8 +38,5 @@ beta:
     SERVICE_NAME: beta
     SERVICE_TAGS: development
 
-
-#dnstester:
-#  image: dnstester
 
 
