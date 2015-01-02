@@ -180,7 +180,8 @@ Alpha is a very simple database application that records the number of times
 tha each host in the load balancer receives a request.  It starts up
 with only knowlege of the service bus and then discovers the database
 configuration parameters (set above in beta) and the network location
-of the database it wants (via consul's DNS mechanism).  
+of the database it wants (via consul's DNS mechanism).  The host of 
+interest to this app is `alpha.postgres.service.consul`
 
 Since there is a load-balancer "in the way", you can just hit 
 `http://alpha.service.consul` repeatedly and watch the different hosts
@@ -275,9 +276,6 @@ because we don't have a `makefile` that under stands how to do this
 automatically. This operation is generally cheap due to docker caching so it
 does not hurt to do: `fig kill; fig build; fig up`.
 
-
-BETA
-====
 
 
 TODO
