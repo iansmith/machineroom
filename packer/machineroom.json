@@ -1,8 +1,5 @@
 
 {
-  "variables": {
-    "password": null
-  },
 
   "builders": [{
     "type": "amazon-ebs",
@@ -22,13 +19,18 @@
     },
    {
       "type":"file",
-      "source":"../consul/bootstrap.conf",
+      "source":"../consul/bootstrap-amazon.conf",
       "destination": "/tmp/bootstrap.conf"
     },
    {
       "type":"file",
       "source":"../consul/consul.conf",
       "destination": "/tmp/consul.conf"
+    },
+   {
+      "type":"file",
+      "source":"../receiver.sh",
+      "destination": "/tmp/receiver"
     },
     {
 		"type":"shell",

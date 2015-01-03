@@ -189,34 +189,99 @@ Since there is a load-balancer "in the way", you can just reload
 `http://alpha.service.consul` repeatedly and watch the different hosts
 get rotated through.
 
+>>>> End of the local portion of the demo.  The rest is for the adventurous
+types that want to try running their own.
 
-BUILDING IMAGES YOURSELF
-========================
-You have to have [packer](http://packer.io) installed to do the things in
-this section.  Also you must have set the `AWS_ACCESS_KEY` and 
-`AWS_SECRET_KEY` environment variables to the usual values.
 
-You'll want to pick a password and then encrypt it with 
-`openssl passwd -crypt fart` and use the encrypted version below. 
+BUILDING IMAGE YOURSELF FOR STAGING
+===================================
+You have to have [packer](http://packer.io) installed 
+_and in your path_, to do the things in this section. You must have 
+set the `AWS_ACCESS_KEY` and  `AWS_SECRET_KEY` environment variables 
+to the usual values. 
 
-If you want to build an AMI for yourself, you can do that
-by going into the packer directory and doing:
+To build your own AMI go into the `packer` directory and type:
+
 ```
-packer build --only=amazon-ebs -var 'password=encryptedpwd' machineroom.json
+packer build machineroom.json
 ```
 
-This builds only the amazon ebs image and sets the user 'igneous' to have
-the password you supply on the command line.
+This builds only the amazon ebs image.
 
 >>>At the moment, you can't build the vagrant image with the same process. 
 Something is different between `vagrant package` and `packer` vagrant
-post-processor.  Sad.
+post-processor.  Sad, sad, sad.
 
 Once you have done that, you'll see an amazon AWS ami pop out on the terminal.
-Go to the amazon console for `us-west-2` and launch it; the defaults are set
-for `t2.micro` but other sizes will probably work.  Set the private key to one
-you have access to so you can ssh in as "ubuntu" to be able to sudo on that
-host.  Once the host is up, make a note of the hostname.
+Go to the amazon console for `us-west-2` and launch it.  
+
+* The defaults are set for `t2.micro` but other sizes will probably work.  
+* Set the private key to one you have access to so you can ssh in as 
+  "ubuntu" to be able to sudo on that host.  
+* Make sure the ports 22 and 80 are open to all hosts in the security group.
+
+Once the host is up, make a note of the hostname.
+
+Starting Your Own Staging Server (The Bad)
+------------------------------------------
+
+You are going to want to check that the consul server came up ok.  There is
+a known problem with the interaction of the raft library and the arp cache
+on linux.  This shouldn't affect _normal_ usage, but if an entry gets lodged
+in the arp cache like this (from `arp -n`):
+```
+Address                  HWtype  HWaddress           Flags Mask            Iface
+
+172.31.24.250                    (incomplete)                              eth0
+```
+
+the raft consensus algorithm will just beat on that address thinking it's 
+participant in the leader election.  Some documentation suggested that this
+can be cleared by waiting for the arp cache to clear, but I couldn't not repro
+that and as forced to reboot my amazon node to get the offending entry out of
+my arp cache.  
+
+You can check this on the host by sshing to the host as ubuntu (using your
+private key) and then doing `sudo tail -f /var/log/upstart/consul.log`.  If
+something is wrong, it'll be spewing messages about not being able to reach
+a certain host or something else.  Generally, silence in that log file is
+golden.
+
+While you are on the machine, check that the service bus came up with 
+`curl http://localhost:8500/v1/catalog/nodes`.  If that works and something
+comes out on the terminal you are probably ok.  If that fails, something
+went wrong in the boot.
+
+
+DEPLOYING TO YOUR STAGING BOX
+===================================
+
+You need to add your key to the remote servers list of acceptable keys.
+This is a horrible ssh hack:
+```
+cat ~/.ssh/id_rsa.pub | ssh ubuntu@yourserver "sudo /usr/local/bin/gitreceive upload-key yourusername"
+```
+
+Then, on your local machine, tell git about the remote server:
+
+```
+git remote add demo git@yourserver:example
+```
+
+All things going according hoyle, you can just push!
+```
+git push demo master
+```
+
+Currently the scripts are careful to do two things.  First, only respond
+to pushes on master, otherwise you'll get a pre-receive hook error.  Second
+to error out after a lot of messages get printed out to the terminal showing
+you building and deploying your source.  We error out intentionally because
+otherwise you have to make a change, commit it, and push again (because
+git would think the push succeeded).  This behavior is actually what you want
+for testing.
+
+
 
 
 OS X SETUP OF ROUTES TO CONTAINERS
